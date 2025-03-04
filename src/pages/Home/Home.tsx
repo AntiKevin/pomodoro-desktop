@@ -8,10 +8,10 @@ export function Home() {
       <div>
         <RotatingTomato />
       </div>
-      <div className='card'>
+      <div className='card text-center'>
         <h1 className='text-xl font-bold'>Pomodoro Timer</h1>
         <p className='text-lg'>A simple timer to help you focus on your tasks.</p>
-        <button onClick={() => navigate('/timer')} className='btn'>Start</button>
+        <button onClick={() => navigate('/timer')} className='btn px-32'>Start</button>
       </div>
     </div>
   )
