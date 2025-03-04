@@ -8,8 +8,8 @@ enum TimerType {
 }
 
 export const Timer = () => {
-    const DEFAULTTIME = 2
-    const DEFAULTRESTTIME = 3
+    const DEFAULTTIME = 1500
+    const DEFAULTRESTTIME = 300
 
     const navigate = useNavigate()
     const [timeLeft, setTimeLeft] = useState(DEFAULTTIME)
@@ -37,11 +37,11 @@ export const Timer = () => {
         setIsRunning(true)
     }
 
-    function isTimerButtonDisabled(timerType: TimerType) {
+    function isTimerButtonDisabled(componentTimerType: TimerType) {
         return (
-            isRunning && timerType !== timerType
+            isRunning && timerType !== componentTimerType
         ) || (
-            timesUp && timerType === timerType
+            timesUp && timerType === componentTimerType
         )
     }
 
