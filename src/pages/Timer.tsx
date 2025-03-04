@@ -1,4 +1,4 @@
-import ASCIIText from "@/components/ascii/ASCIIText"
+import { RotatingTomato } from "@/components/tomato/RotatingTomato"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router"
 
@@ -9,16 +9,20 @@ enum TimerType {
 
 export const Timer = () => {
     const DEFAULTTIME = 2
-    const DEFAULTRESTTIME = 300
+    const DEFAULTRESTTIME = 3
 
     const navigate = useNavigate()
     const [timeLeft, setTimeLeft] = useState(DEFAULTTIME)
     const [hasStarted, setHasStarted] = useState(false)
     const [isRunning, setIsRunning] = useState(false)
-    const [timerType, setTimerType] = useState<TimerType>(TimerType.WORK)
+    const [timerType, setTimerType] = useState<TimerType>(TimerType.REST)
     const [timesUp, setTimesUp] = useState(false)
 
     function startTimer() {
+        if (isRunning) {
+            stopTimer()
+        }
+        setTimerType(TimerType.WORK)
         setIsRunning(true)
         setHasStarted(true)
         setTimeLeft(DEFAULTTIME)
@@ -29,13 +33,27 @@ export const Timer = () => {
         setIsRunning(false)
     }
 
+    function resumeTimer() {
+        setIsRunning(true)
+    }
+
+    function isTimerButtonDisabled(timerType: TimerType) {
+        return (
+            isRunning && timerType !== timerType
+        ) || (
+            timesUp && timerType === timerType
+        )
+    }
+
     function startRest() {
         if (isRunning) {
             stopTimer()
         }
+        setTimerType(TimerType.REST)
+        setIsRunning(true)
+        setHasStarted(true)
         setTimeLeft(DEFAULTRESTTIME)
         setTimesUp(false)
-        startTimer()
     }
 
     useEffect(() => {
@@ -45,11 +63,8 @@ export const Timer = () => {
                     if (prev === 0) {
                         clearInterval(interval)
                         setIsRunning(false)
-                        return 0
-                    }
-                    if (prev === 1) {
                         setTimesUp(true)
-                        setTimerType(timerType === TimerType.WORK ? TimerType.REST : TimerType.WORK)
+                        return 0
                     }
                     return prev - 1
                 })
@@ -60,31 +75,21 @@ export const Timer = () => {
     }, [isRunning])
     
     return (
-        <div className='flex flex-col items-center justify-center h-screen w-full'>
+        <div className='flex flex-col items-center justify-center h-screen'>
           <div className="flex items-center justify-center">
-            {/* <RotatingTomato /> */}
-            <ASCIIText
-            text='🍅'
-            enableWaves={true}
-            textFontSize={150}
-            planeBaseHeight={10}
-            />
+            <RotatingTomato />
+          </div>
+          <div>
             {/* Timer */}
-            {timesUp?
-            <ASCIIText
-            text={`${timerType === TimerType.WORK ? 'Take a break!' : 'Back to work!'}`}
-            enableWaves={false}
-            asciiFontSize={7}
-            planeBaseHeight={5}
-            textFontSize={50}
-            />
-            :<ASCIIText
-            text={`${(Math.floor(timeLeft/60))}:${(timeLeft % 60).toString().padStart(2, '0')}`}
-            enableWaves={false}
-            asciiFontSize={5}
-            planeBaseHeight={10}
-            textFontSize={100}
-            />}
+            { timesUp ?
+            <p className="text-4xl">
+                {timerType === TimerType.WORK ? 'Take a break!' : 'Back to work!'}
+            </p>
+            :
+            <p className="text-4xl">
+                {(Math.floor(timeLeft/60))}:{(timeLeft % 60).toString().padStart(2, '0')}
+            </p>
+            }
           </div>
           <div className='card'>
             <div 
@@ -92,7 +97,7 @@ export const Timer = () => {
             >
                 <button 
                   className={`btn`}
-                  disabled={timesUp && timerType === TimerType.WORK} 
+                  disabled={isTimerButtonDisabled(TimerType.WORK)} 
                   onClick={startTimer}
                 >
                     {timerType === TimerType.WORK && isRunning ? 'Restart' : 'Work'}
@@ -100,14 +105,14 @@ export const Timer = () => {
                 <button 
                   className={`btn`} 
                   disabled={!hasStarted || timesUp} 
-                  onClick={isRunning ? stopTimer : startTimer}
+                  onClick={isRunning ? stopTimer : resumeTimer}
                 >
                     {isRunning || timesUp ? 'Pause' : 'Resume'}
                 </button>
                 <button 
                   className={`btn`} 
                   onClick={startRest}
-                  disabled={timesUp && timerType === TimerType.REST}
+                  disabled={isTimerButtonDisabled(TimerType.REST)}
                 >
                    {timerType === TimerType.REST && isRunning ? 'Restart' : 'Rest'}
                 </button>
